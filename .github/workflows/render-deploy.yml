@@ -1,0 +1,22 @@
+name: Deploy backend to Render
+
+# The Render service was created via API (public repo, no GitHub webhook), so a
+# push doesn't auto-deploy on its own. This workflow triggers a Render deploy on
+# every push to main via the Render API. Requires repo secret RENDER_API_KEY.
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        run: |
+          echo "Triggering Render deploy for cgd-api…"
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            "https://api.render.com/v1/services/srv-d8o4jq3sq97s73f5r170/deploys" \
+            -d '{}'
+          echo "Deploy triggered."
