@@ -1,0 +1,3 @@
+# The backend (Express + SQLite) is NOT deployed on Vercel — it runs on Render.
+# Excluding it keeps the Vercel project a pure static Vite build.
+server

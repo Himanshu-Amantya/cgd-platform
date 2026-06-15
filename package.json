@@ -1,0 +1,23 @@
+{
+  "name": "cgd-platform",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Gasonet CGD Platform — Customer Portal, MyPNG onboarding & Officer Console (MyPNG ↔ CGD integration)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "server": "node server/index.js",
+    "server:install": "npm --prefix server install"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.8"
+  }
+}

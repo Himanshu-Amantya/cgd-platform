@@ -1,0 +1,4 @@
+node_modules/
+cgd.db
+cgd.db-wal
+cgd.db-shm

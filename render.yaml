@@ -1,0 +1,23 @@
+# Render blueprint for the CGD backend (Express + SQLite).
+# rootDir is relative to the connected repo root. This assumes the repo root is
+# the cgd-platform/ folder (recommended). If you connect a parent repo instead,
+# change rootDir to cgd-platform/server.
+services:
+  - type: web
+    name: cgd-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true      # Render generates a strong secret
+      - key: SHOW_OTP
+        value: "1"               # keep OTP returned (no SMS provider yet); set 0 when wired
+    # Optional: uncomment for a persistent SQLite file across restarts/deploys (paid disk)
+    # disk:
+    #   name: cgd-data
+    #   mountPath: /var/data
+    # and set env DB_PATH=/var/data/cgd.db
