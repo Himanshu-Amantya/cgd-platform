@@ -23,12 +23,12 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: C.g200, elevation: 0, shadowOpacity: 0 },
-        headerTitleStyle: { fontSize: 16, fontWeight: '800', color: C.g900, letterSpacing: -.3 },
-        tabBarStyle: { backgroundColor: '#fff', borderTopColor: C.g200, borderTopWidth: 1, height: 84, paddingBottom: 28, paddingTop: 10 },
+        headerStyle: { backgroundColor: '#fff', elevation: 0, shadowOpacity: 0, borderBottomWidth: 1, borderBottomColor: C.g100 },
+        headerTitleStyle: { fontSize: 17, fontWeight: '900', color: C.g900, letterSpacing: -.4 },
+        tabBarStyle: { backgroundColor: '#fff', borderTopColor: C.g100, borderTopWidth: 1, height: 88, paddingBottom: 28, paddingTop: 10 },
         tabBarActiveTintColor: C.blueMid,
-        tabBarInactiveTintColor: C.g400,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '700', marginTop: 2 },
+        tabBarInactiveTintColor: C.g300,
+        tabBarLabelStyle: { fontSize: 10.5, fontWeight: '800', marginTop: 2, letterSpacing: .2 },
       }}>
       <Tab.Screen name="Home" component={HomeScreen}
         options={{ title: 'Dashboard', tabBarLabel: 'Home', tabBarIcon: ({ color, size }) => <TabIcon name="home" color={color} size={size} /> }} />
