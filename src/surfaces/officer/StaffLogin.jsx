@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { Icon } from '../../lib/icons.jsx'
 import { api, session } from '../../lib/api.js'
 
+const DEMO_ACCOUNTS = [
+  { email: 'priya.sharma@gasonet.in', password: 'gasonet123', empId: 'GAS-EMP-0142', name: 'Priya Sharma', role: 'CGD Officer', ga: 'Bikaner GA' },
+  { email: 'vikram.r@gasonet.in',     password: 'gasonet123', empId: 'GAS-EMP-0156', name: 'Vikram Rathore', role: 'Meter Reader', ga: 'Bikaner GA' },
+  { email: 'sunita.j@gasonet.in',     password: 'gasonet123', empId: 'GAS-EMP-0163', name: 'Sunita Joshi', role: 'Billing Executive', ga: 'Churu GA' },
+  { email: 'mohit.a@gasonet.in',      password: 'gasonet123', empId: 'GAS-EMP-0170', name: 'Mohit Agarwal', role: 'Admin', ga: 'Bikaner GA' },
+]
+
 export default function StaffLogin({ onLogin }) {
   const nav = useNavigate()
   const [email, setEmail] = useState('priya.sharma@gasonet.in')
@@ -16,7 +23,25 @@ export default function StaffLogin({ onLogin }) {
       const { token, user } = await api.staffLogin(email, password)
       session.set(token, { ...user, type: 'staff' })
       onLogin(user)
-    } catch (e) { setErr(e.message) } finally { setBusy(false) }
+    } catch (e) {
+      // Backend unavailable (network error) → fall back to demo credentials so
+      // the hosted demo works without a deployed API server.
+      const isNetworkError = e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('fetch')
+      if (isNetworkError) {
+        const demo = DEMO_ACCOUNTS.find(
+          (a) => a.email.toLowerCase() === email.trim().toLowerCase() && a.password === password
+        )
+        if (demo) {
+          const { password: _, ...user } = demo
+          session.set('demo-token', { ...user, type: 'staff' })
+          onLogin(user)
+          return
+        }
+        setErr('Backend unavailable. Use a demo account (password: gasonet123).')
+      } else {
+        setErr(e.message)
+      }
+    } finally { setBusy(false) }
   }
 
   return (
