@@ -92,6 +92,9 @@ function BillDrawer({ b, onClose }) {
 
       {b.status === 'PENDING_VALIDATION' && (
         <>
+          <Panel title="Meter Reading Photo" icon="upload" sub="Attach the meter snapshot captured during reading">
+            <MeterPhotoUpload />
+          </Panel>
           <div className="alert alert-info"><Icon name="info" size={18} /><div>Validate the reading and charges, then generate the bill for manager approval.</div></div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => setReject(true)}><Icon name="x" size={15} />Reject</button>
@@ -131,6 +134,34 @@ function RejectModal({ b, onClose, onReject }) {
       <div className="fgroup"><label className="flabel">Reason <Req /></label>
         <textarea className="finput" placeholder="e.g. Reading discrepancy — verify before regenerating…" value={reason} onChange={(e) => setReason(e.target.value)} /></div>
     </Modal>
+  )
+}
+
+/* Meter reading photo — upload placeholder (preview only; wire to storage later) */
+function MeterPhotoUpload() {
+  const [photo, setPhoto] = useState(null)   // { name, url }
+  const onPick = (e) => {
+    const f = e.target.files?.[0]
+    if (f) setPhoto({ name: f.name, url: URL.createObjectURL(f) })
+  }
+  if (photo) {
+    return (
+      <div className="photo-up has">
+        <img src={photo.url} alt="Meter reading" />
+        <div className="photo-meta">
+          <div className="nm"><Icon name="check" size={14} style={{ color: 'var(--green)' }} />{photo.name}</div>
+          <button className="btn btn-light btn-sm" onClick={() => setPhoto(null)}><Icon name="x" size={13} />Remove</button>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <label className="photo-up">
+      <input type="file" accept="image/*" capture="environment" hidden onChange={onPick} />
+      <Icon name="upload" size={22} />
+      <div className="t">Upload meter photo</div>
+      <div className="s">Tap to capture or choose an image (JPG / PNG)</div>
+    </label>
   )
 }
 
@@ -229,16 +260,33 @@ function ScheduleVisitModal({ c, onClose, onSave }) {
 
 function RecordPaymentModal({ c, onClose, onSave }) {
   const [mode, setMode] = useState('UPI')
+  const [amount, setAmount] = useState(String(c.amount))
+  const [ref, setRef] = useState('')
+  const [date, setDate] = useState('2026-06-16')
+  const refNeeded = mode !== 'Cash'
+  const refLabel = mode === 'UPI' ? 'UPI Transaction ID' : mode === 'Card' ? 'Card Auth / RRN' : 'Bank Reference No.'
+  const valid = Number(amount) > 0 && date && (!refNeeded || ref.trim())
   return (
     <Modal title="Record Payment" icon="rupee" onClose={onClose}
       footer={<><button className="btn btn-light" onClick={onClose}>Cancel</button>
-        <button className="btn btn-green" onClick={() => onSave(mode)}><Icon name="check" size={15} />Record &amp; Settle</button></>}>
+        <button className="btn btn-green" disabled={!valid} onClick={() => onSave(mode)}><Icon name="check" size={15} />Record &amp; Settle</button></>}>
       <div className="card" style={{ background: 'var(--g50)', marginBottom: 16 }}><div className="card-b" style={{ padding: 14 }}>
         <KV k="Customer">{c.name}</KV><KV k="Invoice"><span className="mono">{c.inv}</span></KV>
-        <KV k="Amount"><span className="mono strong" style={{ color: 'var(--green)' }}>{inr(c.amount)}</span></KV>
+        <KV k="Outstanding"><span className="mono strong" style={{ color: 'var(--green)' }}>{inr(c.amount)}</span></KV>
       </div></div>
-      <div className="fgroup"><label className="flabel">Payment Mode <Req /></label>
-        <select className="finput" value={mode} onChange={(e) => setMode(e.target.value)}><option>UPI</option><option>Cash</option><option>NEFT / Bank</option><option>Card</option></select></div>
+      <div className="grid-2">
+        <div className="fgroup"><label className="flabel">Payment Mode <Req /></label>
+          <select className="finput" value={mode} onChange={(e) => setMode(e.target.value)}><option>UPI</option><option>Cash</option><option>NEFT / Bank</option><option>Card</option></select></div>
+        <div className="fgroup"><label className="flabel">Amount Received (₹) <Req /></label>
+          <input className="finput mono" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} /></div>
+      </div>
+      <div className="grid-2">
+        <div className="fgroup"><label className="flabel">Payment Date <Req /></label><input className="finput" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+        {refNeeded && <div className="fgroup"><label className="flabel">{refLabel} <Req /></label><input className="finput mono" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Reference number" /></div>}
+      </div>
+      {Number(amount) > 0 && Number(amount) < c.amount && (
+        <div className="alert alert-amber" style={{ marginBottom: 0 }}><Icon name="alert" size={18} /><div>Partial payment — <b>{inr(c.amount - Number(amount))}</b> will remain outstanding on <span className="mono">{c.inv}</span>.</div></div>
+      )}
     </Modal>
   )
 }

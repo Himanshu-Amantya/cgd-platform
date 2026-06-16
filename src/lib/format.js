@@ -1,5 +1,8 @@
 export const inr = (n) => '₹' + Number(n || 0).toLocaleString('en-IN')
 
+// Basic RFC-ish email format check: non-space local@domain.tld
+export const isEmail = (s = '') => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s).trim())
+
 export const initials = (name = '') =>
   name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
 

@@ -5,8 +5,8 @@ import { Panel, Badge, StatusChip, Menu, Modal, Confirm, Drawer, KV, Empty, Crum
 import { useToast } from '../../components/Toast.jsx'
 import { useApps, Store } from '../../lib/store.js'
 import { api } from '../../lib/api.js'
-import { inr, avatarColor, initials } from '../../lib/format.js'
-import { CATEGORIES, ROLES, BILL_CYCLES, COMPLAINT_TEAMS } from './staffData.js'
+import { inr, avatarColor, initials, isEmail } from '../../lib/format.js'
+import { CATEGORIES, CUSTOMERS, ROLES, BILL_CYCLES, COMPLAINT_TEAMS } from './staffData.js'
 
 const Req = () => <span className="req">*</span>
 
@@ -219,17 +219,21 @@ function EditUserModal({ edit, onClose, onSave }) {
   const [name, setName] = useState(user.name)
   const [email, setEmail] = useState(user.email)
   const [role, setRole] = useState(user.role)
+  const emailError = email && !isEmail(email)
+  const canSave = mode === 'role' || (name.trim() && isEmail(email))
   return (
     <Modal title={mode === 'role' ? 'Edit Role' : 'Edit User Details'} icon={mode === 'role' ? 'shield' : 'edit'} onClose={onClose}
       footer={<><button className="btn btn-light" onClick={onClose}>Cancel</button>
-        <button className="btn btn-primary" onClick={() => onSave(mode === 'role' ? { role } : { name, email })}><Icon name="check" size={15} />Save Changes</button></>}>
+        <button className="btn btn-primary" disabled={!canSave} onClick={() => onSave(mode === 'role' ? { role } : { name, email })}><Icon name="check" size={15} />Save Changes</button></>}>
       {mode === 'role' ? (
         <div className="fgroup"><label className="flabel">Role <Req /></label>
           <select className="finput" value={role} onChange={(e) => setRole(e.target.value)}>{ROLES.map((r) => <option key={r}>{r}</option>)}</select></div>
       ) : (
         <>
           <div className="fgroup"><label className="flabel">Full Name <Req /></label><input className="finput" value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div className="fgroup"><label className="flabel">Email <Req /></label><input className="finput" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div className="fgroup"><label className="flabel">Email <Req /></label>
+            <input className={'finput' + (emailError ? ' input-err' : '')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={emailError ? 'true' : undefined} />
+            {emailError && <span className="field-err"><Icon name="alert" size={13} />Enter a valid email address.</span>}</div>
         </>
       )}
     </Modal>
@@ -240,8 +244,11 @@ export function InviteUser() {
   const nav = useNavigate()
   const toast = useToast()
   const [form, setForm] = useState({ name: '', email: '', role: ROLES[1], ga: 'Bikaner GA' })
+  const [touched, setTouched] = useState(false)
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
-  const valid = form.name && form.email
+  const emailOk = isEmail(form.email)
+  const emailError = touched && form.email && !emailOk
+  const valid = form.name && emailOk
   const invite = async () => { await api.inviteStaff(form); toast({ tone: 'green', title: 'Invitation sent', msg: form.email + ' · ' + form.role }); nav('/officer/users') }
   return (
     <div className="page" style={{ maxWidth: 640 }}>
@@ -250,7 +257,9 @@ export function InviteUser() {
       <Panel title="New Employee Invitation" icon="users">
         <div className="grid-2">
           <div className="fgroup"><label className="flabel">Full Name <Req /></label><input className="finput" value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Employee name" /></div>
-          <div className="fgroup"><label className="flabel">Work Email <Req /></label><input className="finput" value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="name@gasonet.in" /></div>
+          <div className="fgroup"><label className="flabel">Work Email <Req /></label>
+            <input className={'finput' + (emailError ? ' input-err' : '')} type="email" value={form.email} onChange={(e) => set('email', e.target.value)} onBlur={() => setTouched(true)} placeholder="name@gasonet.in" aria-invalid={emailError ? 'true' : undefined} />
+            {emailError && <span className="field-err"><Icon name="alert" size={13} />Enter a valid email address (e.g. name@gasonet.in).</span>}</div>
           <div className="fgroup"><label className="flabel">Role <Req /></label>
             <select className="finput" value={form.role} onChange={(e) => set('role', e.target.value)}>{ROLES.map((r) => <option key={r}>{r}</option>)}</select></div>
           <div className="fgroup"><label className="flabel">Geographical Area <Req /></label>
@@ -266,12 +275,22 @@ export function InviteUser() {
   )
 }
 
-/* ════════ Billing ════════ */
+/* ════════ Billing Config — editable category / deposit / tariff list ════════ */
 export function Billing() {
   const nav = useNavigate()
+  const toast = useToast()
+  const [cats, setCats] = useState(() => CATEGORIES.map((c) => ({ ...c })))
+  const [edit, setEdit] = useState(null)   // category being edited (null = none)
+
+  const save = (changes) => {
+    setCats((cs) => cs.map((c) => (c.code === edit.code ? { ...c, ...changes } : c)))
+    toast({ tone: 'green', title: 'Category updated', msg: edit.code + ' · ' + edit.name })
+    setEdit(null)
+  }
+
   return (
     <div className="page wide">
-      <div className="phead"><div><h1>Billing</h1><p>Customer master, new connections, categories and security deposit configuration.</p></div></div>
+      <div className="phead"><div><h1>Billing Config</h1><p>Customer master, new connections, categories and security deposit configuration.</p></div></div>
       <div className="grid-2" style={{ marginBottom: 18 }}>
         <Panel title="New Connection" icon="plus" sub="Register a new connection at the office"
           action={<button className="btn btn-soft btn-sm" onClick={() => nav('/officer/applications')}>Open</button>}>
@@ -282,15 +301,43 @@ export function Billing() {
           <p style={{ fontSize: 12.5, color: 'var(--g500)' }}>View and search the master record of all PNG customers.</p>
         </Panel>
       </div>
-      <Panel title="Customer Category & Security Deposit" icon="receipt" bodyStyle={{ padding: 0 }}>
+      <Panel title="Customer Category & Security Deposit" icon="receipt" sub="Configure deposit & tariff per category" bodyStyle={{ padding: 0 }}>
         <div className="tbl-wrap"><table className="tbl">
-          <thead><tr><th>Code</th><th>Category</th><th>Security Deposit</th><th>Tariff</th><th>Customers</th></tr></thead>
-          <tbody>{CATEGORIES.map((c) => (
-            <tr key={c.code}><td className="mono strong">{c.code}</td><td>{c.name}</td><td className="mono strong">{inr(c.sd)}</td><td className="mono">{c.tariff}</td><td className="mono">{c.count.toLocaleString('en-IN')}</td></tr>
+          <thead><tr><th>Code</th><th>Category</th><th>Security Deposit</th><th>Tariff</th><th>Customers</th><th style={{ textAlign: 'right' }}>Action</th></tr></thead>
+          <tbody>{cats.map((c) => (
+            <tr key={c.code}>
+              <td className="mono strong">{c.code}</td><td>{c.name}</td>
+              <td className="mono strong">{inr(c.sd)}</td><td className="mono">{c.tariff}</td>
+              <td className="mono">{c.count.toLocaleString('en-IN')}</td>
+              <td style={{ textAlign: 'right' }}><button className="btn btn-light btn-sm" onClick={() => setEdit(c)}><Icon name="edit" size={13} />Edit</button></td>
+            </tr>
           ))}</tbody>
         </table></div>
       </Panel>
+      {edit && <EditCategoryModal cat={edit} onClose={() => setEdit(null)} onSave={save} />}
     </div>
+  )
+}
+
+function EditCategoryModal({ cat, onClose, onSave }) {
+  const [name, setName] = useState(cat.name)
+  const [sd, setSd] = useState(String(cat.sd))
+  const [tariff, setTariff] = useState(cat.tariff)
+  const valid = name.trim() && Number(sd) >= 0 && tariff.trim()
+  return (
+    <Modal title="Edit Billing Category" icon="receipt" onClose={onClose}
+      footer={<><button className="btn btn-light" onClick={onClose}>Cancel</button>
+        <button className="btn btn-primary" disabled={!valid} onClick={() => onSave({ name, sd: Number(sd), tariff })}><Icon name="check" size={15} />Save Changes</button></>}>
+      <div className="card" style={{ background: 'var(--g50)', marginBottom: 16 }}><div className="card-b" style={{ padding: 14 }}>
+        <KV k="Category Code"><span className="mono strong">{cat.code}</span></KV>
+        <KV k="Active Customers"><span className="mono">{cat.count.toLocaleString('en-IN')}</span></KV>
+      </div></div>
+      <div className="grid-2">
+        <div className="fgroup"><label className="flabel">Category Name <Req /></label><input className="finput" value={name} onChange={(e) => setName(e.target.value)} /></div>
+        <div className="fgroup"><label className="flabel">Security Deposit (₹) <Req /></label><input className="finput mono" inputMode="numeric" value={sd} onChange={(e) => setSd(e.target.value.replace(/\D/g, ''))} /></div>
+      </div>
+      <div className="fgroup"><label className="flabel">Tariff <Req /></label><input className="finput mono" value={tariff} onChange={(e) => setTariff(e.target.value)} placeholder="e.g. ₹54 / m³" /></div>
+    </Modal>
   )
 }
 
