@@ -341,4 +341,59 @@ select.finput{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xml
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 }
 
-@media(max-width:980px){.kpi-grid{grid-template-columns:1fr 1fr}.grid-2,.pm-grid,.comp-grid{grid-template-columns:1fr}.sidebar{display:none}.login-brand{display:none}}
+/* ════════ responsive ════════ */
+.sb-toggle{display:none}
+.sb-backdrop{display:none;position:fixed;inset:0;z-index:199;background:rgba(15,23,42,.48);backdrop-filter:blur(2px)}
+
+/* tablet + mobile — sidebar becomes an overlay */
+@media(max-width:980px){
+  .sidebar{position:fixed;left:-100%;top:0;height:100vh;z-index:200;transition:left .26s cubic-bezier(.4,0,.2,1);width:var(--sidebar)}
+  .shell.sb-open .sidebar{left:0;box-shadow:8px 0 48px rgba(0,0,0,.3)}
+  .shell.sb-open .sb-backdrop{display:block;animation:fadeBg .2s}
+  .sb-toggle{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--g100);border:1px solid var(--g200);color:var(--g600);flex-shrink:0;transition:.14s}
+  .sb-toggle:hover{background:var(--g200);color:var(--g900)}
+  .tb-search{display:none}
+  .tb-crumb p{display:none}
+  .tb-env{display:none}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .grid-2,.pm-grid,.comp-grid{grid-template-columns:1fr}
+  .login-brand{display:none}
+  .page{padding:20px 20px 48px}
+  .page.wide{padding:20px 20px 48px}
+  .phead h1{font-size:20px}
+}
+
+/* mobile */
+@media(max-width:640px){
+  .page,.page.wide{padding:14px 14px 48px}
+  .phead{flex-direction:column;align-items:flex-start;gap:10px}
+  .phead h1{font-size:17px}
+  .kpi-grid{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr}
+  .topbar{padding:0 14px;gap:8px}
+  .tb-right{gap:5px}
+  .role-sel{display:none}
+  .funnel{padding:3px}
+  .fn{min-width:84px;padding:10px 10px}
+  .fn .v{font-size:20px}
+  .drawer{width:100vw;max-width:100vw}
+  .toast-wrap{right:14px;left:14px}
+  .toast{width:100%}
+  .filterbar{gap:6px}
+  .chip{padding:5px 10px;font-size:11px}
+  .modal{width:calc(100vw - 24px)}
+  .login-form{padding:24px 16px}
+}
+
+/* small phones */
+@media(max-width:420px){
+  .page,.page.wide{padding:12px 12px 40px}
+  .topbar{padding:0 12px}
+  .tb-crumb h2{font-size:13px}
+  .tb-crumb .ic{display:none}
+  .tb-right{gap:3px}
+  .tb-icon-btn{width:30px;height:30px}
+  .fn{min-width:72px;padding:8px 8px}
+  .fn .v{font-size:17px}
+  .fn .k{font-size:9px}
+}

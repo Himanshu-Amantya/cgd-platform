@@ -233,6 +233,7 @@ function Layout() {
   const pending = apps.filter((a) => EDITABLE.includes(a.status)).length
   const crumb = crumbFor(loc.pathname)
   const [logoutAsk, setLogoutAsk] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const doLogout = () => { setLogoutAsk(false); session.clear(); nav('/') }
   const su = session.user() || STAFF_USER
   const [role, setRole] = useState(su.role || STAFF_USER.role)
@@ -240,6 +241,7 @@ function Layout() {
   const isActive = (it) => (it.end ? loc.pathname === it.to : loc.pathname.startsWith(it.to))
   const can = (it) => !it.roles || it.roles.includes(role)
   const visibleNav = NAV.map((g) => ({ ...g, items: g.items.filter(can) })).filter((g) => g.items.length)
+  const goTo = (to) => { nav(to); setMobileOpen(false) }
   const switchRole = (r) => {
     setRole(r)
     const allowed = NAV.flatMap((g) => g.items).filter((it) => !it.roles || it.roles.includes(r))
@@ -247,7 +249,8 @@ function Layout() {
   }
 
   return (
-    <div className="shell">
+    <div className={'shell' + (mobileOpen ? ' sb-open' : '')}>
+      <div className="sb-backdrop" onClick={() => setMobileOpen(false)} />
       <aside className="sidebar">
         <div className="sb-brand"><div className="sb-logo"><Icon name="leaf" size={21} style={{ color: '#fff' }} /></div>
           <div><div className="sb-name">my<b>CGD</b></div><div className="sb-tag">Gasonet · Staff Console</div></div></div>
@@ -256,7 +259,7 @@ function Layout() {
             <div key={g.sec}>
               <div className="sb-sec">{g.sec}</div>
               {g.items.map((it) => (
-                <button key={it.to} className={'sb-item' + (isActive(it) ? ' active' : '')} onClick={() => nav(it.to)}>
+                <button key={it.to} className={'sb-item' + (isActive(it) ? ' active' : '')} onClick={() => goTo(it.to)}>
                   <Icon name={it.icon} size={17} /><span className="lbl">{it.label}</span>
                   {it.badge === 'pending' && pending > 0 && <span className="pill alert">{pending}</span>}
                   {it.pill && <span className="pill">{it.pill}</span>}
@@ -265,7 +268,7 @@ function Layout() {
             </div>
           ))}
           <div className="sb-sec">System</div>
-          <button className="sb-item" onClick={async () => { await api.resetDemo(); await Store.load(); await BillingStore.load(); nav('/officer') }}><Icon name="refresh" size={17} /><span className="lbl">Reset demo data</span></button>
+          <button className="sb-item" onClick={async () => { await api.resetDemo(); await Store.load(); await BillingStore.load(); goTo('/officer') }}><Icon name="refresh" size={17} /><span className="lbl">Reset demo data</span></button>
         </div>
         <div className="sb-foot"><div className="sb-user" onClick={() => setLogoutAsk(true)} title="Sign out">
           <div className="sb-ava">{su0}</div>
@@ -274,17 +277,20 @@ function Layout() {
       </aside>
       <div className="main-area">
         <div className="topbar">
+          <button className="sb-toggle" aria-label="Open menu" onClick={() => setMobileOpen((v) => !v)}>
+            <Icon name={mobileOpen ? 'x' : 'menu'} size={19} />
+          </button>
           <div className="tb-crumb"><div className="ic"><Icon name={crumb[0]} size={18} /></div><div><h2>{crumb[1]}</h2><p>{crumb[2]}</p></div></div>
           <div className="tb-right">
             <div className="tb-search"><Icon name="search" size={15} /><input placeholder="Search anything…" aria-label="Search" /></div>
-            <select className="finput" aria-label="View as role" title="Demo: view console as role" value={role} onChange={(e) => switchRole(e.target.value)}
+            <select className="finput role-sel" aria-label="View as role" title="Demo: view console as role" value={role} onChange={(e) => switchRole(e.target.value)}
               style={{ width: 'auto', padding: '6px 28px 6px 10px', fontSize: 12, fontWeight: 600 }}>
               {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
             <span className="tb-env uat">UAT</span>
-            <button className="tb-icon-btn" aria-label="Notifications" onClick={() => nav('/officer')}><Icon name="bell" size={17} />{pending > 0 && <span className="tb-badge">{pending}</span>}</button>
-            <button className="tb-icon-btn" aria-label="Settings" onClick={() => nav('/officer/settings')}><Icon name="settings" size={17} /></button>
-            <div className="sb-ava" style={{ borderRadius: 9, cursor: 'pointer' }} onClick={() => nav('/officer/profile')}>{su0}</div>
+            <button className="tb-icon-btn" aria-label="Notifications" onClick={() => goTo('/officer')}><Icon name="bell" size={17} />{pending > 0 && <span className="tb-badge">{pending}</span>}</button>
+            <button className="tb-icon-btn" aria-label="Settings" onClick={() => goTo('/officer/settings')}><Icon name="settings" size={17} /></button>
+            <div className="sb-ava" style={{ borderRadius: 9, cursor: 'pointer' }} onClick={() => goTo('/officer/profile')}>{su0}</div>
             <button className="tb-icon-btn" aria-label="Logout" title="Logout" onClick={() => setLogoutAsk(true)}><Icon name="logout" size={17} /></button>
           </div>
         </div>
