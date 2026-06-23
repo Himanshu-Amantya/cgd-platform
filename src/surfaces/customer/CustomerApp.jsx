@@ -25,10 +25,6 @@ const initials = USER.name.split(' ').map((w) => w[0]).join('').slice(0, 2)
 
 const NAV = [
   { sec: 'Overview', items: [{ to: '/customer', label: 'Dashboard', icon: 'home', end: true }] },
-  { sec: 'Customer Onboarding', items: [
-    { to: '/customer/onboarding', label: 'New Connection', icon: 'leaf' },
-    { action: 'apply', label: 'Apply on MyPNG', icon: 'plus' },
-  ] },
   { sec: 'My Connections', items: [
     { to: '/customer/applications', label: 'My Applications', icon: 'file' },
     { to: '/customer/bills', label: 'Bills & Payments', icon: 'receipt' },
