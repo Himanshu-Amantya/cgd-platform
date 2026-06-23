@@ -28,10 +28,6 @@ export default function Dashboard() {
   return (
     <div className="page">
       <div className="phead"><div><h1>Namaste, {USER.name.split(' ')[0]} 👋</h1><p>Manage your PNG connection applications and payments from one place.</p></div></div>
-      <div className="cta-card">
-        <div><h2>Apply for a New PNG Connection</h2><p>Start a clean, piped natural-gas connection for your home or business. We'll guide you through MyPNG and bring you right back here to pay.</p></div>
-        <button className="btn btn-green btn-lg" style={{ position: 'relative', flexShrink: 0 }} onClick={onApply}><Icon name="plus" size={17} />Apply for New PNG Connection</button>
-      </div>
       <div className="kpi-grid">
         {kpis.map((k, i) => (
           <div className="kpi" key={i}>
