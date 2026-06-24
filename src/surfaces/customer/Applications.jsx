@@ -27,7 +27,6 @@ export default function Applications() {
     <div className="page">
       <div className="phead">
         <div><h1>My Applications</h1><p>Every PNG connection request, its status and payment.</p></div>
-        <button className="btn btn-primary" onClick={onApply}><Icon name="plus" size={15} />New Connection</button>
       </div>
       <div className="filterbar">
         <div className="fsearch"><Icon name="search" size={15} /><input placeholder="Search by PNG ID…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
