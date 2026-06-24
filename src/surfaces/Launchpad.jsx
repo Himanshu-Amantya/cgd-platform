@@ -145,11 +145,6 @@ export default function Launchpad() {
               </div>
             ))}
           </div>
-          <div style={{ textAlign: 'center', marginTop: 40 }}>
-            <button className="lp-btn-primary" onClick={() => nav('/customer')}>
-              Apply Now <Icon name="arrowR" size={16} />
-            </button>
-          </div>
         </div>
       </section>
 
