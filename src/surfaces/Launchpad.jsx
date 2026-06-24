@@ -97,7 +97,7 @@ export default function Launchpad() {
             <h1>Clean Piped Gas,<br />Delivered to Your<br /><span>Doorstep.</span></h1>
             <p>Apply for a new PNG connection, pay bills, and track everything online — integrated with the MyPNG national portal.</p>
             <div className="lp-hero-actions">
-              <button className="lp-btn-primary" onClick={() => nav('/customer/onboarding')}>
+              <button className="lp-btn-primary" onClick={() => window.location.href = 'https://13.234.85.124/login'}>
                 Apply for New Connection <Icon name="arrowR" size={16} />
               </button>
               <button className="lp-btn-ghost" onClick={() => scrollTo('#how')}>
