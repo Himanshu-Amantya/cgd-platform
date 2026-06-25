@@ -205,29 +205,6 @@ export default function Launchpad() {
         </div>
       </section>
 
-      {/* Portals */}
-      <section className="lp-portals">
-        <div className="lp-container">
-          <div className="lp-sec-label lp-sec-label-dark">Access Portals</div>
-          <h2 className="lp-sec-title" style={{ color: '#fff' }}>Choose Your Portal</h2>
-          <div className="lp-portal-grid">
-            {[
-              { to: '/customer', icon: 'leaf', tone: 'green', name: 'Customer Portal', who: 'Consumers', desc: 'Apply for PNG, pay bills, track applications and manage your account.' },
-              { to: '/mypng', icon: 'flame', tone: 'blue', name: 'MyPNG Portal', who: 'Onboarding', desc: 'PNGRB national portal for eKYC, address verification and application submission.' },
-              { to: '/officer', icon: 'shield', tone: 'purple', name: 'Staff Console', who: 'Gasonet Staff', desc: 'Review applications, manage customers, meters, billing and operations.' },
-            ].map((p) => (
-              <div key={p.to} className="lp-portal-card" onClick={() => nav(p.to)}>
-                <div className={'lp-portal-ic ic-' + p.tone}><Icon name={p.icon} size={24} /></div>
-                <div className="lp-portal-who">{p.who}</div>
-                <h3>{p.name}</h3>
-                <p>{p.desc}</p>
-                <span className="lp-portal-link">Open <Icon name="arrowR" size={14} /></span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="lp-footer" id="contact">
         <div className="lp-container">
